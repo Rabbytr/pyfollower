@@ -1,0 +1,10 @@
+build/
+venv/
+dist/
+_build/
+_generate/
+.idea/
+*.so
+*.py[cod]
+*.egg-info
+*env*
