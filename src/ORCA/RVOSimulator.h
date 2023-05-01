@@ -47,7 +47,8 @@
 #include <cstddef>
 #include <limits>
 #include <vector>
-
+#include <complex>
+#include <functional>
 #include "Vector2.h"
 
 namespace RVO {
@@ -58,6 +59,9 @@ namespace RVO {
 	 * of an error by functions in RVO::RVOSimulator.
 	 */
 	const size_t RVO_ERROR = std::numeric_limits<size_t>::max();
+
+	typedef std::function<std::complex<float>(std::complex<float>, std::complex<float>, std::complex<float>,
+		std::complex<float>, std::complex<float>, std::complex<float>) > PVC_AXIS_FUNC;
 
 	/**
 	 * \brief      Defines a directed line.
@@ -588,6 +592,14 @@ namespace RVO {
 		 */
 		void setPrefVelocityCorrection(bool correction);
 
+		/**
+		 * \brief      Sets the axis function for preferred velocity correction
+		 * \param      func   The axis function
+		 */
+		void setPvcAxisFunction(const PVC_AXIS_FUNC& func) {
+			pvcAxisFunction_ = func;
+		}
+
 	private:
 		std::vector<Agent *> agents_;
 		Agent *defaultAgent_;
@@ -596,6 +608,10 @@ namespace RVO {
 		std::vector<Obstacle *> obstacles_;
 		float timeStep_;
 		bool prefVelocityCorrection = true;
+		PVC_AXIS_FUNC pvcAxisFunction_ = [](std::complex<float> x0, std::complex<float> x1, std::complex<float> x2,
+			std::complex<float> x3, std::complex<float> x4, std::complex<float> x5) {
+				return x0 + x1;
+		};
 
 		friend class Agent;
 		friend class KdTree;

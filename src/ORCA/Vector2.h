@@ -2,6 +2,12 @@
  * Vector2.h
  * RVO2 Library
  *
+ * =====================================
+ * NOTICE: This is an adapted version of the file RVOSimulator.cpp from the RVO2 library.
+ * It has been changed by Rabbytr for integration into the pyfollower library.
+ * Original RVO2 license header below:
+ * =====================================
+ * 
  * Copyright 2008 University of North Carolina at Chapel Hill
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -40,6 +46,7 @@
 
 #include <cmath>
 #include <ostream>
+#include <complex>
 
 namespace RVO {
 	/**
@@ -237,6 +244,16 @@ namespace RVO {
 			return *this;
 		}
 
+		/**
+		 * \brief      Returns the corresponding comlex
+		 * \param      void
+		 * \return     Returns the corresponding comlex, that is, x_ + y_*i
+		 */
+		inline std::complex<float> complex()
+		{
+			return std::complex<float>(x_, y_);
+		}
+
 	private:
 		float x_;
 		float y_;
@@ -327,6 +344,7 @@ namespace RVO {
 	{
 		return vector / abs(vector);
 	}
+
 }
 
 #endif /* RVO_VECTOR2_H_ */

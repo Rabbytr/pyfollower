@@ -29,7 +29,9 @@ namespace py = pybind11;
 using namespace py::literals;
 using namespace RVO;
 
-//std::vector<size_t> RVO::RVOSimulator::pyGetAgentNeighbors(size_t agentNo) const {
+typedef RVOSimulator Simulator;
+
+//std::vector<size_t> RVO::Simulator::pyGetAgentNeighbors(size_t agentNo) const {
 //    std::vector<size_t> ret;
 //    auto neigbors = agents_[agentNo]->agentNeighbors_;
 //    ret.reserve(neigbors.size());
@@ -39,7 +41,7 @@ using namespace RVO;
 //    return ret;
 //}
 //
-//size_t addObstacles(RVO::RVOSimulator& self, const std::vector<std::tuple<float, float>> nodes) {
+//size_t addObstacles(RVO::Simulator& self, const std::vector<std::tuple<float, float>> nodes) {
 //    std::vector<RVO::Vector2> vertices;
 //    vertices.reserve(nodes.size());
 //    for (std::tuple<float, float> tp : nodes) {
@@ -48,7 +50,7 @@ using namespace RVO;
 //    return self.addObstacle(vertices);
 //}
 
-py::array_t<double> getAgentPositions(const RVOSimulator& self) {
+py::array_t<double> getAgentPositions(const Simulator& self) {
     const int agent_number = static_cast<int>(self.getNumAgents());
     py::array_t<double> ret = py::array_t<double>(self.getNumAgents() * 2);
     ret.resize({ agent_number, 2 });
@@ -61,7 +63,7 @@ py::array_t<double> getAgentPositions(const RVOSimulator& self) {
     return ret;
 }
 
-py::array_t<double> getAgentVelocities(const RVOSimulator& self) {
+py::array_t<double> getAgentVelocities(const Simulator& self) {
     const int agent_number = static_cast<int>(self.getNumAgents());
     py::array_t<double> ret = py::array_t<double>(self.getNumAgents() * 2);
     ret.resize({ agent_number, 2 });
@@ -74,33 +76,32 @@ py::array_t<double> getAgentVelocities(const RVOSimulator& self) {
     return ret;
 }
 
-int func_arg(const RVOSimulator& self, const std::function<int(int)>& f) {
-    return f(10);
+int func_arg(const Simulator& self, const std::function<int(int)>& f) {
+    return f(9);
 }
 
-
-
 PYBIND11_MODULE(follower, m) {
-    py::class_<RVOSimulator>(m, "Engine")
+    py::class_<Simulator>(m, "Engine")
         .def(py::init<>())
-        .def("set_agent_defaults", &RVOSimulator::setAgentDefaults)
-        .def("pref_velocity_correction", &RVOSimulator::setPrefVelocityCorrection, "correction"_a)
-        .def("set_timestep", &RVOSimulator::setTimeStep, "timestep"_a, "Set the simulator timestep")
-        .def("add_agent", static_cast<size_t(RVOSimulator::*)(const Vector2 & position)>
-            (&RVOSimulator::addAgent), "position"_a)
-        .def("set_agent_pref", &RVOSimulator::setAgentPrefVelocity, "agent_id"_a, "pref"_a)
-        .def("follower_step", &RVOSimulator::doStep)
-        .def("get_agent_position", &RVOSimulator::getAgentPosition, "agent_id"_a)
-        .def("get_agent_velocity", &RVOSimulator::getAgentVelocity, "agent_id"_a)
+        .def("set_agent_defaults", &Simulator::setAgentDefaults)
+        .def("pref_velocity_correction", &Simulator::setPrefVelocityCorrection, "correction"_a)
+        .def("set_timestep", &Simulator::setTimeStep, "timestep"_a, "Set the simulator timestep")
+        .def("add_agent", static_cast<size_t(Simulator::*)(const Vector2 & position)>
+            (&Simulator::addAgent), "position"_a)
+        .def("follower_step", &Simulator::doStep, 
+            py::call_guard<py::gil_scoped_release>())  // release the python GIL
+        .def("set_agent_pref", &Simulator::setAgentPrefVelocity, "agent_id"_a, "pref"_a)
+        .def("get_agent_position", &Simulator::getAgentPosition, "agent_id"_a)
+        .def("get_agent_velocity", &Simulator::getAgentVelocity, "agent_id"_a)
         .def("get_agent_positions", &getAgentPositions)
         .def("get_agent_velocities", &getAgentVelocities)
-        .def("get_global_time", &RVOSimulator::getGlobalTime)
-        .def("func_test", &func_arg)
+        .def("get_global_time", &Simulator::getGlobalTime)
+        .def("set_pvc_axis_function", &Simulator::setPvcAxisFunction, "pvc_axis_func"_a)
 
-        .def("add_obstacles",&RVOSimulator::addObstacle, "vertices"_a)
-        .def("process_obstacles", &RVOSimulator::processObstacles)
-        //.def("get_agent_neigbors", &RVOSimulator::pyGetAgentNeighbors, "agent_id"_a)
-        .def("query_visibility", &RVOSimulator::queryVisibility,"point1"_a, "point2"_a, "radius"_a)
+        .def("add_obstacles",&Simulator::addObstacle, "vertices"_a)
+        .def("process_obstacles", &Simulator::processObstacles)
+        //.def("get_agent_neigbors", &Simulator::pyGetAgentNeighbors, "agent_id"_a)
+        .def("query_visibility", &Simulator::queryVisibility,"point1"_a, "point2"_a, "radius"_a)
         ;
 
     py::class_<Vector2>(m, "Vector2")

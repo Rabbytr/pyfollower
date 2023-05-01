@@ -16,11 +16,10 @@
 # limitations under the License.
 #
 
-cmake_minimum_required( VERSION 3.10 )
+cmake_minimum_required( VERSION 3.20 )
 project( follower )
 set (CMAKE_CXX_STANDARD 17)
 
-# set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/../bin)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${PROJECT_BINARY_DIR}/bin")
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY "${PROJECT_BINARY_DIR}/bin")
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY "${PROJECT_BINARY_DIR}/bin")
@@ -41,7 +40,5 @@ endif (FOLLOWER_USE_MULTITHREADING)
 if (NOT MSVC)
 	add_definitions(-O3 -lstdc++fs -fPIC -shared)
 endif() 
-
-SET(CMAKE_BUILD_TYPE "Release")
 
 add_subdirectory(src)

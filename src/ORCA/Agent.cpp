@@ -40,6 +40,7 @@
 
 #include "KdTree.h"
 #include "Obstacle.h"
+#include <iostream>
 
 namespace RVO {
 	Agent::Agent(RVOSimulator *sim) : maxNeighbors_(0), maxSpeed_(0.0f), neighborDist_(0.0f), radius_(0.0f), sim_(sim), timeHorizon_(0.0f), timeHorizonObst_(0.0f), id_(0) { }
@@ -74,7 +75,11 @@ namespace RVO {
 			unit_v = velocity_ / v_abs;
 		}
 
-		Vector2 g = unit_v + unit_prev;
+		//Vector2 g = unit_v + unit_prev;
+		auto complex_g = sim_->pvcAxisFunction_(unit_prev.complex(), unit_v.complex(), v_abs, pref_v_abs,
+			(unit_prev * unit_v), (RVO::det(unit_prev, unit_v)));
+		Vector2 g = Vector2(complex_g.real(), complex_g.imag());
+
 		if (unit_prev * unit_v < 0.5f) {
 			return;
 			if (v_abs < maxSpeed_ / 3) {
